@@ -1,11 +1,15 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
+// =====================
 // Register User
+// =====================
 const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
+    // Check if user already exists
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
@@ -38,7 +42,9 @@ const registerUser = async (req, res) => {
   }
 };
 
+// =====================
 // Login User
+// =====================
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -61,8 +67,16 @@ const loginUser = async (req, res) => {
       });
     }
 
+    // Generate JWT Token
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
     res.status(200).json({
       message: "Login Successful",
+      token,
     });
 
   } catch (error) {
@@ -72,7 +86,90 @@ const loginUser = async (req, res) => {
   }
 };
 
+// =====================
+// Forgot Password
+// =====================
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Check user
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // Generate Reset Token
+    const resetToken = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    // Create Reset Link
+    const resetLink = `http://localhost:5173/reset-password/${resetToken}`;
+
+    res.status(200).json({
+      message: "Reset link generated",
+      resetLink,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+// =====================
+// Reset Password
+// =====================
+const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    // Verify Token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Find User
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // Hash New Password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Update Password
+    user.password = hashedPassword;
+
+    // Save User
+    await user.save();
+
+    res.status(200).json({
+      message: "Password Reset Successful",
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Invalid or Expired Token",
+    });
+  }
+};
+
+// =====================
+// Export Controllers
+// =====================
 module.exports = {
   registerUser,
   loginUser,
+  forgotPassword,
+  resetPassword,
 };
