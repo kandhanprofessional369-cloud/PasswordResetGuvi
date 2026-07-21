@@ -2,17 +2,23 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
-
 const connectDB = require("./config/db");
 const userRoutes = require("./routes/userRoutes");
+
 const app = express();
 
 // Connect Database
 connectDB();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: "https://password-reset-guvi-cw8z.vercel.app",
+  credentials: true
+}));
+
 app.use(express.json());
+
+// Routes
 app.use("/api/users", userRoutes);
 
 // Test Route
