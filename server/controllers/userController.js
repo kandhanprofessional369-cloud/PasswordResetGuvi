@@ -1,22 +1,11 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
+const axios = require("axios");
 
 
 
-const transporter = nodemailer.createTransport({
-  host: "smtp-relay.brevo.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
-});
+
 
 console.log(process.env.EMAIL_USER);
 console.log(process.env.EMAIL_PASS ? "SMTP key exists" : "SMTP key missing");
@@ -128,32 +117,59 @@ const forgotPassword = async (req, res) => {
 
     const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
-    console.log("Before sendMail");
-console.log("SMTP User:", process.env.EMAIL_USER);
+    console.log("Before sending email");
 
-    await transporter.sendMail({
-  from: '"Password Reset" <banuvenkateshshanthi@gmail.com>',
-  to: user.email,
-  subject: "Password Reset Request",
-  html: `
-    <h2>Password Reset</h2>
-    <a href="${resetLink}">Reset Password</a>
-  `,
-});
+await axios.post(
+  "https://api.brevo.com/v3/smtp/email",
+  {
+    sender: {
+      name: "GUVI Password Reset",
+      email: "banuvenkateshshanthi@gmail.com", // Your verified Brevo sender
+    },
+    to: [
+      {
+        email: user.email,
+      },
+    ],
+    subject: "Password Reset Request",
+    htmlContent: `
+      <h2>Password Reset</h2>
+      <p>Click the button below to reset your password:</p>
 
-    console.log("After sendMail");
+      <a href="${resetLink}">
+        Reset Password
+      </a>
+
+      <p>This link expires in 15 minutes.</p>
+    `,
+  },
+  {
+    headers: {
+      "api-key": process.env.BREVO_API_KEY,
+      "Content-Type": "application/json",
+    },
+  }
+);
+
+console.log("Email sent successfully");
 
     res.status(200).json({
       message: "Password reset link has been sent to your email.",
     });
 
-  } catch (error) {
-    console.error("Forgot Password Error:", error);
+  }  catch (error) {
+  console.error("Forgot Password Error:");
 
-    res.status(500).json({
-      message: error.message,
-    });
+  if (error.response) {
+    console.error(error.response.data);
+  } else {
+    console.error(error.message);
   }
+
+  res.status(500).json({
+    message: error.response?.data || error.message,
+  });
+}
 };
 
 // =====================
