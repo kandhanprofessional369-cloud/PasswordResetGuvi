@@ -126,6 +126,12 @@ const forgotPassword = async (req, res) => {
 
     console.log("Before sendMail");
 
+    console.log("Before verify");
+
+await transporter.verify();
+
+console.log("SMTP connection verified");
+
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: user.email,
