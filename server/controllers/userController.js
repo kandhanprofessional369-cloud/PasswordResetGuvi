@@ -34,7 +34,6 @@ const registerUser = async (req, res) => {
     res.status(201).json({
       message: "User Registered Successfully",
     });
-
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -68,17 +67,14 @@ const loginUser = async (req, res) => {
     }
 
     // Generate JWT Token
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
     res.status(200).json({
       message: "Login Successful",
       token,
     });
-
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -103,20 +99,17 @@ const forgotPassword = async (req, res) => {
     }
 
     // Generate Reset Token
-    const resetToken = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "15m" }
-    );
+    const resetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "15m",
+    });
 
     // Create Reset Link
-    const resetLink = `http://localhost:5173/reset-password/${resetToken}`;
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
     res.status(200).json({
       message: "Reset link generated",
       resetLink,
     });
-
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -156,7 +149,6 @@ const resetPassword = async (req, res) => {
     res.status(200).json({
       message: "Password Reset Successful",
     });
-
   } catch (error) {
     res.status(500).json({
       message: "Invalid or Expired Token",

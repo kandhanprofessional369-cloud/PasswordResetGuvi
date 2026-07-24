@@ -8,11 +8,13 @@ function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       const response = await axios.post(
@@ -34,6 +36,8 @@ function Register() {
     } catch (error) {
   setMessage(error.response?.data?.message || "Something went wrong. Please try again."
   );
+}finally {
+  setLoading(false);
 }
   };
 
@@ -77,8 +81,14 @@ function Register() {
 
       
 
-      <button type="submit"
-       className="btn btn-primary w-100 mb-3">Register</button>
+      <button
+  type="submit"
+  className="btn btn-primary w-100 mb-3"
+  disabled={loading}
+>
+  {loading ? "Registering..." : "Register"}
+</button>
+
       <p>
   Already have an account?{" "}
   <Link to="/login">Login</Link>

@@ -7,73 +7,62 @@ function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [resetLink, setResetLink] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/forgot-password`,
         {
           email,
-        }
+        },
       );
 
       setMessage(response.data.message);
       setResetLink(response.data.resetLink);
-
     } catch (error) {
-  setMessage(
-    error.response?.data?.message || "Something went wrong"
-  );
-}
+      setMessage(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-  <AuthLayout title="Forgot Password">
+    <AuthLayout title="Forgot Password">
+      <form onSubmit={handleSubmit}>
+        <input
+          type="email"
+          className="form-control mb-3"
+          placeholder="Enter your email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-    <form onSubmit={handleSubmit}>
+        <button
+          type="submit"
+          className="btn btn-primary w-100"
+          disabled={loading}
+        >
+          {loading ? "Sending..." : "Send Reset Link"}
+        </button>
 
-      <input
-        type="email"
-        className="form-control mb-3"
-        placeholder="Enter your email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+        <p className="text-center mt-3 text-success">{message}</p>
 
-      <button
-        type="submit"
-        className="btn btn-primary w-100"
-      >
-        Send Reset Link
-      </button>
+        {resetLink && (
+          <div className="text-center mt-3">
+            <a href={resetLink}>Reset Password</a>
+          </div>
+        )}
 
-
-      <p className="text-center mt-3 text-success">
-        {message}
-      </p>
-
-
-      {resetLink && (
-        <div className="text-center mt-3">
-          <a href={resetLink}>
-            Reset Password
-          </a>
-        </div>
-      )}
-
-
-      <p className="text-center mt-3">
-        <Link to="/login">
-          Back to Login
-        </Link>
-      </p>
-
-    </form>
-
-  </AuthLayout>
-);
+        <p className="text-center mt-3">
+          <Link to="/login">Back to Login</Link>
+        </p>
+      </form>
+    </AuthLayout>
+  );
 }
 
 export default ForgotPassword;
