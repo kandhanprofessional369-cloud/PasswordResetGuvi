@@ -132,7 +132,7 @@ const forgotPassword = async (req, res) => {
 console.log("SMTP User:", process.env.EMAIL_USER);
 
     await transporter.sendMail({
-  from: '"Guvi" <banuvenkateshshanthi@gmail.com>',
+  from: '"Password Reset" <banuvenkateshshanthi@gmail.com>',
   to: user.email,
   subject: "Password Reset Request",
   html: `
