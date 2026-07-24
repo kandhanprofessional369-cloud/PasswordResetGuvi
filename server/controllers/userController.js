@@ -101,45 +101,50 @@ const loginUser = async (req, res) => {
 // =====================
 const forgotPassword = async (req, res) => {
   try {
+    console.log("Forgot Password API called");
+
     const { email } = req.body;
 
-    // Check user
     const user = await User.findOne({ email });
 
     if (!user) {
+      console.log("User not found");
       return res.status(404).json({
         message: "User not found",
       });
     }
 
-    // Generate Reset Token
-    const resetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "15m",
-    });
+    console.log("User found:", user.email);
 
-    // Create Reset Link
+    const resetToken = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+
     const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+
+    console.log("Before sendMail");
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: user.email,
       subject: "Password Reset Request",
       html: `
-    <h2>Password Reset</h2>
-    <p>Click the button below to reset your password:</p>
-
-    <a href="${resetLink}">
-      Reset Password
-    </a>
-
-    <p>This link will expire in 15 minutes.</p>
-  `,
+        <h2>Password Reset</h2>
+        <a href="${resetLink}">Reset Password</a>
+      `,
     });
+
+    console.log("After sendMail");
 
     res.status(200).json({
       message: "Password reset link has been sent to your email.",
     });
+
   } catch (error) {
+    console.error("Forgot Password Error:", error);
+
     res.status(500).json({
       message: error.message,
     });
