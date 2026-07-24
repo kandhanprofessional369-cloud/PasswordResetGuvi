@@ -13,7 +13,13 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
 });
+
+console.log(process.env.EMAIL_USER);
+console.log(process.env.EMAIL_PASS ? "SMTP key exists" : "SMTP key missing");
 // =====================
 // Register User
 // =====================
@@ -123,7 +129,7 @@ const forgotPassword = async (req, res) => {
     const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
     console.log("Before sendMail");
-
+console.log("SMTP User:", process.env.EMAIL_USER);
 
     await transporter.sendMail({
   from: '"Guvi" <banuvenkateshshanthi@gmail.com>',
