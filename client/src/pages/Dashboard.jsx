@@ -28,7 +28,7 @@ function Dashboard() {
               <div className="text-center">
                 <h5>Session Status</h5>
 
-                <span className="badge bg-success fs-6"><i class="bi bi-check-circle-fill"></i> Active
+                <span className="badge bg-success fs-6"><i className="bi bi-check-circle-fill"></i> Active
                   
                 </span>
               </div>
