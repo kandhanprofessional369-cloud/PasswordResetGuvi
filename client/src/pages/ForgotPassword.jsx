@@ -6,7 +6,6 @@ import AuthLayout from "../components/AuthLayout";
 function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [resetLink, setResetLink] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -22,7 +21,6 @@ function ForgotPassword() {
       );
 
       setMessage(response.data.message);
-      setResetLink(response.data.resetLink);
     } catch (error) {
       setMessage(error.response?.data?.message || "Something went wrong");
     } finally {
@@ -49,13 +47,7 @@ function ForgotPassword() {
           {loading ? "Sending..." : "Send Reset Link"}
         </button>
 
-        <p className="text-center mt-3 text-success">{message}</p>
-
-        {resetLink && (
-          <div className="text-center mt-3">
-            <a href={resetLink}>Reset Password</a>
-          </div>
-        )}
+        <p className="text-center mt-3">{message}</p>
 
         <p className="text-center mt-3">
           <Link to="/login">Back to Login</Link>

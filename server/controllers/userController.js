@@ -1,6 +1,15 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 // =====================
 // Register User
@@ -106,9 +115,24 @@ const forgotPassword = async (req, res) => {
     // Create Reset Link
     const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: "Password Reset Request",
+      html: `
+    <h2>Password Reset</h2>
+    <p>Click the button below to reset your password:</p>
+
+    <a href="${resetLink}">
+      Reset Password
+    </a>
+
+    <p>This link will expire in 15 minutes.</p>
+  `,
+    });
+
     res.status(200).json({
-      message: "Reset link generated",
-      resetLink,
+      message: "Password reset link has been sent to your email.",
     });
   } catch (error) {
     res.status(500).json({
