@@ -11,10 +11,15 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(cors({
-  origin: "https://password-reset-guvi-cw8z.vercel.app",
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://password-reset-guvi-cw8z.vercel.app",
+    ],
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 
